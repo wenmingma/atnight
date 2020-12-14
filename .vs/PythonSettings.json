@@ -1,4 +1,5 @@
 {
   "TestFramework": "Pytest",
-  "Interpreter": "Global|PythonCore|3.7"
+  "Interpreter": "Global|PythonCore|3.7",
+  "SuppressPackageInstallationPrompt": true
 }

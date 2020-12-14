@@ -299,18 +299,29 @@ def simplyClickOnThe(countItems):
         sleep(1)
 
 def findPositionAccordingToPictures():
-    # 根据图片识别屏幕位置，装上OpenCV之后效果好，可以用来挂机打游戏
-    aKeyTransformation = r"D:\Testfiles\yijianzhuanhua.jpg"
-    exportCSV = r"D:\Testfiles\daochucsv.jpg"
-    imageCenter = pyautogui.center(pyautogui.locateOnScreen(exportCSV, confidence=0.8))
-    print(imageCenter)
+    # 根据图片定位，加上OpenCV后效果好
+    #生意参谋系
+    aKeyTransformation = r"D:\Testfiles\ImagePosition\yijianzhuanhua.jpg"
+    exportCSV = r"D:\Testfiles\ImagePosition\daochucsv.jpg"
+    saveCSV = r"D:\Testfiles\ImagePosition\baocun.jpg"
+    cycleBack = r"D:\Testfiles\ImagePosition\zhouqidaotui.jpg"
+
+    #网页阿明工具系
+    reviewAnalysis = r"D:\Testfiles\ImagePosition\reviewAnalysis.jpg"
+    amingdaochuCSV = r"D:\Testfiles\ImagePosition\amingdaochuCSV.jpg"
+    try:
+        imageCenter = pyautogui.center(pyautogui.locateOnScreen(amingdaochuCSV, confidence=0.8))
+        x,y = imageCenter
+        print(x,y)
+    except TypeError as error1:print("定位不到",error1)
+    
 
 if __name__=="__main__":
 
     pyautogui.PAUSE=2  # 基本停止
     pyautogui.FAILSAFE = True  # 错误停止
 
-    #findPositionAccordingToPictures()  # 根据图片识别屏幕位置
+    findPositionAccordingToPictures()  # 根据图片识别屏幕位置
 
     #imageRecognition()  # OCR
 
@@ -330,7 +341,7 @@ if __name__=="__main__":
 
     #downloadBrand()  # 下载品牌
 
-    highBrand()
+    #highBrand()
 
     #highCommodityTrad()  # 商品排行高交易csv下载
 
