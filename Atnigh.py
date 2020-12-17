@@ -14,6 +14,7 @@ from retrying import retry
 from PIL import Image
 import pytesseract
 import cv2,requests
+from urllib import request
 
 
 def forFileName(path):
@@ -234,16 +235,35 @@ def imageOCR(image):
     print(content)
 
 def take3CAuthentication():
-    # 3C认证
-    data = {}
+    # 3C认证,站内可查，不必站外
+    data = {
+        "keyword":"暖风机",
+        "chaxuntype":"产品名称 Product Name",
+        "_h_select_chaxuntype":"product",
+        "chaxuntype": "product",
+        "pageSize":"100",
+        "sortColumns":"null",
+        "pageNumber":"1"
+            }
+
     headers = {
-        "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36",
-        "Host":"webdata.cqccms.com.cn"
+        "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36",
+        "Host":"webdata.cqccms.com.cn",
+        "Origin":"http://webdata.cqccms.com.cn"
         }
     start_url = "http://webdata.cqccms.com.cn/webdata/query/CCCCerti.do"
     session = requests.Session()
-    r = session.post(url=start_url,headers=headers)
-    print(r.status_code)
+    r = session.post(url=start_url,headers=headers,data=data)
+    if r.status_code==200:
+        verificationCode = "http://webdata.cqccms.com.cn/webdata/ImagepassController/imagePass.do"
+        request.urlretrieve(verificationCode,"verificationCode.png")
+        img = Image.open(r"verificationCode.png")
+        img.show()
+        data["imagePassword"] = input("请输入验证码：")
+        r2 = session.post(start_url,headers=headers,data=data)
+        print(r2.status_code)
+        print(r2.text)
+
 
 
 if __name__=='__main__':
@@ -251,28 +271,15 @@ if __name__=='__main__':
     # 图像OCR模块
     #image = cv2.imread(r"D:\Testfiles\zhutu.jpg")
     #imageOCR(get_grayscale(image))  # 效果不好
-    #imageOCR(thresholding(image))  # 报错
-    #imageOCR(opening(image))  # 识别不出来
-    #imageOCR(canny(image))  # 效果很差
 
-    #take3CAuthentication()
+    take3CAuthentication()  # 3C
+
+    #inputTest()
 
     # 遍历文件夹转换csv为xlsx
     #traversalFolder(r"D:\atnight\蓝禾科技\车用吸尘器\评论分析")
 
-    # 多表合并，关键词定位文件，合并模式（默认0）
-    #nameTheFileList = ["评论","问大家","SKU_","SKU每日趋势"]
-    #nameTheFileList = ["评论"]
-    #for i in nameTheFileList:
-    #    severalTables(r"D:\atnight\蓝禾科技\车用吸尘器\评论分析",recognitionField="{}".format(i),mergerWay=0)
-
     # 评论文件情感分析
-    #aboutMerger(r"E:\小天数据库\运营&策划-数据需求\2020.09.15_玉婷_B3","评论分析",2)
-
-    # 输入文件路径，浮动区间，价格下限，价格上限，以众数聚合过于分散的数据
-    #toDealWithSimilarNumerical(r"G:\testfiles\店透视_销量TOP88-市场数据分析-声卡转换器_1595813191037.xlsx",2,0,860)
-
-    # 计算相关关键词价格分布:(文件路径，价格分割基数(可选0表示自定义区间模式))
-    #keywordPriceSegment(r"G:\testfiles\2020.08.27宏昌_2\市场分析_声卡 直播专用.xlsx",50,0)
+    #aboutMerger(r"E:\","评论分析",2)
 
     print("-" * 50,"{0}".format(time.strftime('%Y-%m-%d %H:%M')),"-" * 50)

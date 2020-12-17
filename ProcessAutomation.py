@@ -8,50 +8,17 @@ from openpyxl.drawing.image import Image
 from PIL import Image
 import os,sys,pytesseract,datacompy
 from pandas.testing import assert_frame_equal
+from retrying import retry
+import cv2,requests
 
 
+def retry_if_io_error(exception):
+    # 根据指定异常重试,@retry(retry_on_exception=retry_if_io_error)
+    return isinstance(exception, IOError)
 
-def sevenDaysIntoShop():
-    # 入店渠道七天，拉到最底部
-
-    # 点击上一天
-    pyautogui.click(clicks=7, interval=1.5)
-
-def keywords30DaysIntoStore():
-    '''
-    30天入店关键词
-    '''
-    countItems = 0
-    while countItems<30:
-        # 点击入店引流词
-        pyautogui.click(607,992)
-        # 点击入店成交词
-        pyautogui.click(696,997)
-        sleep(2)
-        # 点击上一天
-        pyautogui.click(1588,247)
-        countItems+=1
-        sleep(1)
-
-def highCommodityTrad():
-    '''
-    商品高交易一键转化
-    '''
-    countItems = 0
-    while countItems<28:
-        # 一键转化
-        pyautogui.click(958,278)
-        sleep(3)
-        # 保存csv
-        pyautogui.click(1295,447)
-        # 确定路径
-        pyautogui.click(1139,668)
-        # 退出转化
-        pyautogui.click(1739,633)
-        # 上个月
-        pyautogui.click(1526,232)
-        sleep(3)
-        countItems+=1
+def retry_if_TypeError_error(exception):
+    # 根据指定异常重试,@retry(retry_on_exception=retry_if_TypeError_error)
+    return isinstance(exception, TypeError)
 
 def imageRecognition():
     # 图像识别
@@ -195,22 +162,125 @@ def downloadBrand():
             # 上个月
             pyautogui.click(1525,230)
             sleep(3)
+
+@retry(wait_fixed=2000)
+def aKeyTransformation():
+    # 点击一键转化
+    x,y = imageCenter = pyautogui.center(pyautogui.locateOnScreen(aKey_Transformation_img, confidence=0.8))
+    pyautogui.click(x,y)
+
+@retry(wait_fixed=2000)
+def exportCSV():
+    # 导出csv
+    x,y = imageCenter = pyautogui.center(pyautogui.locateOnScreen(export_CSV_img, confidence=0.8))
+    pyautogui.click(x,y)
+
+@retry(wait_fixed=2000)
+def confirmThatSavePath():
+    # 点击保存
+    x,y = imageCenter = pyautogui.center(pyautogui.locateOnScreen(save_CSV_img, confidence=0.8))
+    pyautogui.click(x,y)
+
+@retry(wait_fixed=2000)
+def closeTransformation():
+    # 关闭转化
+    pyautogui.click(157,595)
+
+@retry(wait_fixed=2000)
+def cycleBackButton():
+    # 时间周期回退按钮
+    x,y = pyautogui.center(pyautogui.locateOnScreen(cycle_Back_img, confidence=0.8))
+    pyautogui.click(x,y)
+
+@retry(wait_fixed=2000)
+def resetTime():
+    # 时间重置
+    x,y = pyautogui.center(pyautogui.locateOnScreen(month_img, confidence=0.8))
+    pyautogui.click(x,y)
+
+@retry(wait_fixed=2000)
+def clickOnCategory():
+    # 点击类目
+    x,y = pyautogui.center(pyautogui.locateOnScreen(enterCategory_img, confidence=0.8))
+    pyautogui.click(x,y)
+
+#@retry(wait_fixed=2000)
+#def clickOnCategory():
+#    # 点击类目
+#    x,y = pyautogui.center(pyautogui.locateOnScreen(enterCategory_img, confidence=0.8))
+#    pyautogui.click(x,y)
+
+@retry(wait_fixed=2000)
+def clickOnCategoryInputBox():
+    # 点击类目输入框
+    x,y = pyautogui.center(pyautogui.locateOnScreen(enterCategory_img, confidence=0.8))
+    pyautogui.click(x,y+30)
+
+@retry(wait_fixed=2000)
+def chooseCategory():
+    # 选择类目，这个有点问题
+    x,y = pyautogui.center(pyautogui.locateOnScreen(enterCategory_img, confidence=0.8))
+    pyautogui.click(x,y+60)
+
+@retry(wait_fixed=2000)
+def clickOnBrand():
+    # 点击品牌
+    x,y = pyautogui.center(pyautogui.locateOnScreen(enterCategory_img, confidence=0.8))
+    pyautogui.click(x,y+50)
+
+
 def highBrand():
-    for i2 in range(0,24):
+    # 商品排行高交易csv下载
+    #df = pd.read_excel(r"D:\Testfiles\text.xlsx",sheet_name="Sheet1")
+    #for i in df["类目"]:
+    #    # 点击 "类目"
+    #    pyautogui.click(594,166)
+    #    # 点击输入框
+    #    pyautogui.click(561,198)
+    #    # 输入产品id
+    #    pyautogui.hotkey('ctrl', 'a')
+    #    pyperclip.copy(i)
+    #    pyautogui.hotkey('ctrl', 'v')
+    #    sleep(1)
+    #    # 点击对应类目
+    #    pyautogui.click(569,231)
+    #    # 点击一键转化
+    #    pyautogui.click(1261,343)
+
+    for i2 in range(0,7):
         sleep(2)
-        # 点击一键转化
-        pyautogui.click(963,277)
-        sleep(4)
+        # 一键转化
+        aKeyTransformation()
+        sleep(6)
         # 导出csv
-        pyautogui.click(1311,445)
+        exportCSV()
         sleep(2)
-        # 点击保存
-        pyautogui.click(600,445)
         # 关闭转化
-        pyautogui.click(157,595)
-        # 上个月
-        pyautogui.click(1525,230)
+        closeTransformation()
+        sleep(2)
+        # 时间回退
+        cycleBackButton()
         sleep(3)
+    ## 点击月
+    #resetTime()
+    #sleep(2)
+    ## 点击品牌
+    #clickOnBrand()
+    #sleep(3)
+    #for i2 in range(0,11):
+    #    sleep(2)
+    #    # 一键转化
+    #    aKeyTransformation()
+    #    sleep(6)
+    #    # 导出csv
+    #    exportCSV()
+    #    sleep(2)
+    #    # 关闭转化
+    #    closeTransformation()
+    #    sleep(2)
+    #    # 时间回退
+    #    cycleBackButton()
+    #    sleep(3)
 
 def downloadIndustryCustomers():
     # 下载行业客群
@@ -288,62 +358,44 @@ def downloadIndustryCustomers():
         pyautogui.hotkey('ctrl', 'shift','y')
         sleep(5)
 
-
-
-def simplyClickOnThe(countItems):
-    sleep(3)
-    i = 0
-    while i<countItems:
-        pyautogui.click()
-        i+=1
-        sleep(1)
-
 def findPositionAccordingToPictures():
-    # 根据图片定位，加上OpenCV后效果好
-    #生意参谋系
-    aKeyTransformation = r"D:\Testfiles\ImagePosition\yijianzhuanhua.jpg"
-    exportCSV = r"D:\Testfiles\ImagePosition\daochucsv.jpg"
-    saveCSV = r"D:\Testfiles\ImagePosition\baocun.jpg"
-    cycleBack = r"D:\Testfiles\ImagePosition\zhouqidaotui.jpg"
-
-    #网页阿明工具系
-    reviewAnalysis = r"D:\Testfiles\ImagePosition\reviewAnalysis.jpg"
-    amingdaochuCSV = r"D:\Testfiles\ImagePosition\amingdaochuCSV.jpg"
+    # 测试图片定位，加上OpenCV后效果好
     try:
-        imageCenter = pyautogui.center(pyautogui.locateOnScreen(amingdaochuCSV, confidence=0.8))
-        x,y = imageCenter
+        x,y = imageCenter = pyautogui.center(pyautogui.locateOnScreen(headsetHeadset_img, confidence=0.8))
         print(x,y)
     except TypeError as error1:print("定位不到",error1)
+
+
+pyautogui.PAUSE=2  # 基本停止
+pyautogui.FAILSAFE = True  # 错误停止
+#生意参谋系
+aKey_Transformation_img = r"D:\Testfiles\ImagePosition\yijianzhuanhua.jpg"
+export_CSV_img = r"D:\Testfiles\ImagePosition\daochucsv.jpg"
+save_CSV_img = r"D:\Testfiles\ImagePosition\baocun.jpg"
+cycle_Back_img = r"D:\Testfiles\ImagePosition\zhouqidaotui.jpg"
+month_img = r"D:\Testfiles\ImagePosition\yue.jpg"
+brand_img = r"D:\Testfiles\ImagePosition\pinpai.jpg"
+goods_img = r"D:\Testfiles\ImagePosition\shangpin.jpg"
+enterCategory_img = r"D:\Testfiles\ImagePosition\zhuanyeban.jpg"
+
+#网页阿明工具系
+review_Analysis_img = r"D:\Testfiles\ImagePosition\reviewAnalysis.jpg"
+aming_daochuCSV_img = r"D:\Testfiles\ImagePosition\daochuCSV.jpg"
     
 
 if __name__=="__main__":
 
-    pyautogui.PAUSE=2  # 基本停止
-    pyautogui.FAILSAFE = True  # 错误停止
-
-    findPositionAccordingToPictures()  # 根据图片识别屏幕位置
+    #findPositionAccordingToPictures()  # 根据图片识别屏幕位置
 
     #imageRecognition()  # OCR
 
-    #keywords30DaysIntoStore()  # 竞品30天关键词
-
-    #sevenDaysIntoShop()  # 竞品七天入店渠道
-
-    #cancelCompetingGoods()  # 取消监控竞品
-
-    #competitiveProductConfiguration()  # 一键转化商品数据
-
     #addCompetingGoods()  # 添加竞品配置
-
-    #simplyClickOnThe(13)  # 单纯点击
 
     #downloadMarket()  # 下载大盘
 
     #downloadBrand()  # 下载品牌
 
-    #highBrand()
-
-    #highCommodityTrad()  # 商品排行高交易csv下载
+    highBrand()  # 商品&品牌排行高交易csv下载
 
     #downloadIndustryCustomers()  # 行业客群下载并截图
 
